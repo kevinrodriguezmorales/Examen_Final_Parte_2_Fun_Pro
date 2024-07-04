@@ -7,44 +7,39 @@ namespace Examen_Final_Parte_2_Fun_Pro.Models
 {
     public class GestorVideojuegos
     {
-        private string p_rutaArchivo = "base_de_informacion.txt";
+        public static string p_rutaArchivo = "base_de_informacion.txt";
         private List<Videojuego> p_listaJuegos;
 
         public GestorVideojuegos()
         {
             p_listaJuegos = new List<Videojuego>();
-            p_CargarJuegos();
+            CargarJuegos();
         }
 
-        public void p_RegistrarJuego(Videojuego juego)
+        public void RegistrarJuego(Videojuego juego)
         {
             p_listaJuegos.Add(juego);
-            p_GuardarJuegos();
+            GuardarJuegos();
         }
 
-        private void p_CargarJuegos()
+        private void CargarJuegos()
         {
             if (File.Exists(p_rutaArchivo))
             {
-                using (StreamReader sr = new StreamReader(p_rutaArchivo))
+                using (FileStream fs = new FileStream(p_rutaArchivo, FileMode.Open, FileAccess.Read))
+                using (BinaryReader br = new BinaryReader(fs))
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
+                    while (fs.Position < fs.Length)
                     {
-                        if (!string.IsNullOrWhiteSpace(line))
-                        {
-                            var data = line.Split(',');
-                            if (data.Length >= 2)
-                            {
-                                p_listaJuegos.Add(new Videojuego(data[0], data[1]));
-                            }
-                        }
+                        string nombreJuego = br.ReadString();
+                        string resultado = br.ReadString();
+                        p_listaJuegos.Add(new Videojuego(nombreJuego, resultado));
                     }
                 }
             }
         }
 
-        private void p_GuardarJuegos()
+        private void GuardarJuegos()
         {
             using (StreamWriter sw = new StreamWriter(p_rutaArchivo))
             {
@@ -55,7 +50,7 @@ namespace Examen_Final_Parte_2_Fun_Pro.Models
             }
         }
 
-        public int p_CalcularPuntosTotales()
+        public int CalcularPuntosTotales()
         {
             int totalPuntos = 0;
             foreach (var juego in p_listaJuegos)
@@ -65,9 +60,15 @@ namespace Examen_Final_Parte_2_Fun_Pro.Models
             return totalPuntos;
         }
 
-        public List<Videojuego> p_ObtenerJuegos()
+        public List<Videojuego> ObtenerJuegos()
         {
             return p_listaJuegos;
+        }
+
+        public void LimpiarJuegos()
+        {
+            p_listaJuegos.Clear();
+            File.WriteAllText(p_rutaArchivo, string.Empty);
         }
     }
 

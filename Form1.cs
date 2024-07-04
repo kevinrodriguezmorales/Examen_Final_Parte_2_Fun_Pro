@@ -15,8 +15,10 @@ namespace RegistroVideojuegos
             InitializeComponent();
             gestor = new GestorVideojuegos();
 
-            p_ActualizarTabla();
-            p_ActualizarPuntosTotales();
+            ActualizarTabla();
+            ActualizarPuntosTotales();
+
+            VerificarContenidoArchivo();
         }
 
         private void buttonAgregar_Click(object sender, EventArgs e)
@@ -37,78 +39,64 @@ namespace RegistroVideojuegos
             }
 
             var juego = new Videojuego(nombreJuego, resultado);
-            gestor.p_RegistrarJuego(juego);
+            gestor.RegistrarJuego(juego);
 
-            p_ActualizarTabla();
-            p_ActualizarPuntosTotales();
+            ActualizarTabla();
+            ActualizarPuntosTotales();
 
-            p_LimpiarCampos();
+            VerificarContenidoArchivo();
+
+            LimpiarCampos();
         }
 
-        private void p_ActualizarTabla()
+        private void ActualizarTabla()
         {
             dataGridView.Rows.Clear();
 
-            // Agregar registro al DataGridView
-            foreach (var juego in gestor.p_ObtenerJuegos())
+            foreach (var juego in gestor.ObtenerJuegos())
             {
                 dataGridView.Rows.Add(juego.p_nombreJuego, juego.p_resultado, juego.p_puntosObtenidos);
             }
         }
 
-        private void p_ActualizarPuntosTotales()
+        private void ActualizarPuntosTotales()
         {
-            // Actualizar puntos totales
-            puntosTotales = gestor.p_CalcularPuntosTotales();
+            puntosTotales = gestor.CalcularPuntosTotales();
             labelPuntosTotales.Text = "Puntos Totales: " + puntosTotales;
         }
 
-        private void GuardarDatos()
-        {
-            using (StreamWriter writer = new StreamWriter("base_de_informacion.txt"))
-            {
-                foreach (DataGridViewRow row in dataGridView.Rows)
-                {
-                    if (!row.IsNewRow)
-                    {
-                        string juego = row.Cells["NombreJuego"].Value.ToString();
-                        string resultado = row.Cells["Resultado"].Value.ToString();
-                        string puntos = row.Cells["Puntos"].Value.ToString();
-                        writer.WriteLine($"{juego},{resultado},{puntos}");
-                    }
-                }
-                writer.WriteLine($"TotalPuntos,{puntosTotales}");
-            }
-        }
-
-        private void CargarDatos()
-        {
-            if (File.Exists("base_de_informacion.txt"))
-            {
-                using (StreamReader reader = new StreamReader("base_de_informacion.txt"))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        string[] data = line.Split(',');
-                        if (data[0] == "TotalPuntos")
-                        {
-                            puntosTotales = int.Parse(data[1]);
-                            labelPuntosTotales.Text = "Puntos Totales: " + puntosTotales;
-                        }
-                        else
-                        {
-                            dataGridView.Rows.Add(data[0], data[1], int.Parse(data[2]));
-                        }
-                    }
-                }
-            }
-        }
-
-        private void p_LimpiarCampos()
+        private void LimpiarCampos()
         {
             textBoxNombreJuego.Text = string.Empty;
             comboBoxResultado.SelectedIndex = -1;
         }
+
+        private void LimpiarArchivo()
+        {
+            gestor.LimpiarJuegos();
+
+            ActualizarTabla();
+            ActualizarPuntosTotales();
+
+            VerificarContenidoArchivo();
+        }
+
+        private void VerificarContenidoArchivo()
+        {
+            if (File.Exists(GestorVideojuegos.p_rutaArchivo) && new FileInfo(GestorVideojuegos.p_rutaArchivo).Length > 0)
+            {
+                buttonLimpiar.Visible = true;
+            }
+            else
+            {
+                buttonLimpiar.Visible = false;
+            }
+        }
+
+        private void buttonLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarArchivo();
+        }
+
     }
 }

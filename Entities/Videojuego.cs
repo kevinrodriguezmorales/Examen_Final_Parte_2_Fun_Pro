@@ -15,10 +15,10 @@ namespace Examen_Final_Parte_2_Fun_Pro.Models
         {
             p_nombreJuego = nombreJuego;
             p_resultado = resultado;
-            p_puntosObtenidos = p_CalcularPuntos();
+            p_puntosObtenidos = CalcularPuntos();
         }
 
-        private int p_CalcularPuntos()
+        private int CalcularPuntos()
         {
             return p_resultado.ToLower() == "gané" ? p_puntosGanados : p_puntosPerdidos;
         }
