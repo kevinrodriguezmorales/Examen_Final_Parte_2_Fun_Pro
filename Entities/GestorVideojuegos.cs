@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 
 namespace Examen_Final_Parte_2_Fun_Pro.Models
 {
     public class GestorVideojuegos
     {
-        public static string p_rutaArchivo = "base_de_informacion.txt";
+        public static string p_rutaArchivo = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "base_de_informacion.txt");
         private List<Videojuego> p_listaJuegos;
 
         public GestorVideojuegos()
@@ -24,16 +25,22 @@ namespace Examen_Final_Parte_2_Fun_Pro.Models
 
         private void CargarJuegos()
         {
-            if (File.Exists(p_rutaArchivo))
+            if (!File.Exists(p_rutaArchivo))
             {
-                using (FileStream fs = new FileStream(p_rutaArchivo, FileMode.Open, FileAccess.Read))
-                using (BinaryReader br = new BinaryReader(fs))
+                File.Create(p_rutaArchivo).Close();
+            }
+            else
+            {
+                using (StreamReader sr = new StreamReader(p_rutaArchivo))
                 {
-                    while (fs.Position < fs.Length)
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        string nombreJuego = br.ReadString();
-                        string resultado = br.ReadString();
-                        p_listaJuegos.Add(new Videojuego(nombreJuego, resultado));
+                        var data = line.Split(',');
+                        if (data.Length >= 2)
+                        {
+                            p_listaJuegos.Add(new Videojuego(data[0], data[1]));
+                        }
                     }
                 }
             }
